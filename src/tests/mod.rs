@@ -12,7 +12,7 @@ ctg1	3423273	0	35825	-	NC_000913.3	3421989	0	35833	35825	35833	60	NM:i:8	ms:i:35
 
     let mut output = String::new();
     for line in &parsed_lines {
-        write!(output, "{line}\n").unwrap();
+        writeln!(output, "{line}").unwrap();
     }
 
     assert_eq!(input, output);
