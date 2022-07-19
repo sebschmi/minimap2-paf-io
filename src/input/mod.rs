@@ -1,11 +1,34 @@
 use crate::data::{
     AlignmentDifference, AlignmentType, Cigar, CigarColumn, DifferenceColumn, PAFLine,
 };
-use crate::error::{column_parse_error, Error, Result};
+use crate::error::{Error, Result};
+use std::io::{BufRead, BufReader, Read};
 use std::str::FromStr;
 
+/// Parse all lines in the given input string.
+pub fn parse_input_str(mut string: &str) -> Result<Vec<PAFLine>> {
+    let mut result = Vec::new();
+    while !string.is_empty() {
+        result.push(parse_line(&mut string)?);
+    }
+    Ok(result)
+}
+
+/// Parse all lines in the given input.
+/// Terminate when the input has no further lines.
+pub fn parse_input_read<Input: Read>(input: &mut Input) -> Result<Vec<PAFLine>> {
+    let mut result = Vec::new();
+    let reader = BufReader::new(input);
+
+    for line in reader.lines() {
+        result.push(parse_line(&mut line?.as_str())?);
+    }
+
+    Ok(result)
+}
+
 /// Parses a line of input into a [PAFLine].
-/// The given string slice is advanved past the parsed line of input.
+/// The given string slice is advanced past the parsed line of input.
 pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
     // required fields
     let query_sequence_name = parse_column(string, false)?;
@@ -13,7 +36,13 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
     let query_start_coordinate = parse_column(string, false)?;
     let query_end_coordinate = parse_column(string, false)?;
     let strand: String = parse_column(string, false)?;
-    let strand = if strand == "+" {true} else if strand == "-" {false} else {return Err(Error::UnexpectedCharacter)};
+    let strand = if strand == "+" {
+        true
+    } else if strand == "-" {
+        false
+    } else {
+        return Err(Error::UnexpectedCharacter);
+    };
     let target_sequence_name = parse_column(string, false)?;
     let target_sequence_length = parse_column(string, false)?;
     let target_start_coordinate_on_original_strand = parse_column(string, false)?;
@@ -41,6 +70,11 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
     let mut length_of_query_regions_with_repetitive_seeds = None;
 
     loop {
+        if string.starts_with('\n') {
+            *string = &string[1..];
+            break;
+        }
+
         if string.len() < 6 {
             if !string.is_empty() && *string != "\n" {
                 return Err(Error::UnexpectedCharacter);
@@ -65,70 +99,70 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
                 number_of_minimisers = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "s1:i:" => {
                 chaining_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "s2:i:" => {
                 best_secondary_chaining_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "NM:i:" => {
                 total_number_of_mismatches_and_gaps = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "MD:Z:" => {
                 unknown_md = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "AS:i:" => {
                 dp_alignment_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "SA:Z:" => {
                 supplementary_alignments = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "ms:i:" => {
                 best_segment_dp_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "nn:i:" => {
                 number_of_ambiguous_bases = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "ts:A:" => {
                 transcript_strand = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "cg:Z:" => cigar_string = Some(parse_cigar(string)?),
@@ -137,24 +171,28 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
                 approximate_per_base_sequence_divergence = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "de:f:" => {
                 gap_compressed_per_base_sequence_divergence = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
             "rl:i:" => {
                 length_of_query_regions_with_repetitive_seeds = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(column_parse_error)?,
+                        .map_err(|_| Error::ColumnParseError)?,
                 )
             }
-            _ => return Err(Error::UnexpectedOptionalColumn),
+            other => {
+                return Err(Error::UnexpectedOptionalColumn {
+                    column_header: other.to_string(),
+                })
+            }
         }
     }
 
@@ -212,7 +250,7 @@ where
     let column = &string[..limit];
     *string = &string[limit + 1..];
 
-    column.parse().map_err(column_parse_error)
+    column.parse().map_err(|_| Error::ColumnParseError)
 }
 
 fn extract_column_value<'input: 'output, 'output>(
@@ -240,7 +278,9 @@ fn parse_cigar(string: &mut &str) -> Result<Cigar> {
             return Err(Error::MalformedCigar);
         };
 
-        let count = string[..limit].parse().map_err(column_parse_error)?;
+        let count = string[..limit]
+            .parse()
+            .map_err(|_| Error::ColumnParseError)?;
         result.push(match &string[limit..limit + 1] {
             "M" => CigarColumn::Match(count),
             "D" => CigarColumn::Deletion(count),
@@ -249,6 +289,10 @@ fn parse_cigar(string: &mut &str) -> Result<Cigar> {
             _ => return Err(Error::MalformedCigar),
         });
         *string = &string[limit + 1..];
+    }
+
+    if string.starts_with(['\t']) {
+        *string = &string[1..];
     }
 
     Ok(Cigar(result))
@@ -268,7 +312,7 @@ fn parse_alignment_difference(string: &mut &str) -> Result<AlignmentDifference> 
 
         result.push(match marker {
             ":" => DifferenceColumn::Match {
-                length: characters.parse().map_err(column_parse_error)?,
+                length: characters.parse().map_err(|_| Error::ColumnParseError)?,
             },
             "-" => DifferenceColumn::Deletion {
                 missing_query_characters: characters.to_string(),
@@ -287,6 +331,10 @@ fn parse_alignment_difference(string: &mut &str) -> Result<AlignmentDifference> 
             }
             _ => return Err(Error::MalformedAlignmentDifference),
         })
+    }
+
+    if string.starts_with(['\t']) {
+        *string = &string[1..];
     }
 
     Ok(AlignmentDifference(result))

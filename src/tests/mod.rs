@@ -1,0 +1,19 @@
+use crate::input::{parse_input_read, parse_input_str};
+use std::fmt::Write;
+
+#[test]
+fn test_real_samples() {
+    let input = "ctg1	3423273	35825	3423273	-	NC_000913.3	3421989	34950	3421989	3386723	3387763	60	NM:i:1040	ms:i:3379440	AS:i:3378494	nn:i:0	tp:A:P	cm:i:338236	s1:i:3384120	s2:i:3656	de:f:0.0001	rl:i:0	cg:Z:133323M1D165M1D41M1D28M1D12M1D87M1D30M1D170M1D175M2D39M1D118M1D73M1D275M1D43M3D12M1D132647M1D146628M1D96M1D261M2D82M2D130M2D17M2D257M1D35M1D134M1D24M2D65M1D125M1D16M1D22M1D75M1D106358M1D4238M1D3138M1D48681M2D31773M2D35730M1D516M2D117M1D222M2D181M2D129290M126I142388M1D1222M2D6036M1D26875M1D54367M1D83671M2D95180M1D7699M1D134M1D130940M1D872M2D841M1D18767M598I7903M1D3132M1D26635M1D333442M1D1002M1D193M2D60M2D12M2D55M1D6M1D41M2D34M1D104M2D1588M1D175M1D16M2D8M1D4M2D142M1D2M2D16M1D164M1D208M1D2M1D179M1D103M1D560M2D38M1D709M2D99222M1D72538M2D1538M1D432M1D388M1D215M2D51065M4D80253M2D460960M2D530M1D72M1D85M1D329M1D401M1D29M1D349M1D26M2D51M1D419M1D42M1D151M1D559M1D671M2D317M2D56M1D83M2D6027M2D235095M1D8361M1D127685M2D5M1D153M2D252M2D422M1D73M1D269M1D195M1D91M1D841M1D23M1D15M1D142M2D57M1D323M2D68552M2D117M1D90M2D140M1D327M2D70M1D181M2D378M1D487M2D432M2D16M1D123848M1D157M1D85M2D43M1D48M1D49M1D15M2D113M2D140M2D60M1D152M1D7M2D394M1D21M1D160M2D137M1D321M2D290M1D23M1D92M2D140M1D196M1D102M2D633M1D5M1D38M2D376M2D94M1D61554M88D169212M2D85645M	cs:Z::133323-g:165-c:41-a:28-c:12-c:87-g:30-g:170-g:175-tc:39-a:118-g:73-t:275-a:43-tgt:12-t:132647-a:146628-t:96-c:261-tc:82-ag:130-ca:17-tc:257-t:35-t:134-a:24-ac:65-a:125-g:16-t:22-c:75-g:106358-a:4238-t:3138-g:48681-cg:31773-ta:35730-t:516-ac:117-c:222-ga:181-ca:129290+acgagcgtactcgtacgagctctctatatgcgtgagatgactcgctcgctcgctgcgcagcgctcactgcgtcacgtctgtcactgctgtcgcagtgtcgacgtcgctctcatcgtgtgtgcatat:142388-a:1222-ta:6036-t:26875-c:54367-g:83671-gt:95180-g:7699-t:134-c:130940-c:872-ct:841-t:18767+cgatgcacgtatgactcactatgatagtgtatgtcagatatgcgatgactgtcatgcagctcacgatgagacgacagcgactcgtcagcgtgcagtgctgctcagatcagtatgcgctcatcgctgcgtatatcgctgctgatacgtgcagctctcagcgatcatacagcgcagcatcgtcatcatatcacacgtcagtgacagcagctcatagacgcagcgtcgcatagtgcgtcacgatacgtgcgcacacgtctcgagactgtcatacgcgtacagcagcgctgcgcgatagcgacatagcactgtcgtcatcgcgcagacgatgacgtcactgcgctgtatgcgcgagtacgactgcgctgagtagtgacgtatcgtgtgagcacgcatatgcgctgtgcgcatcacgcatcatgcatatcatgatctgtgcgtacgtgagagcgtgtagtgactgcagtgcatgtacgcagtgagagcagagatagcgctgatgtcgcgtgctgcgtacgcacacgtcagtagctgacagagacagctgatagacagagcactgagcactcacacatcatacactatcagtagtgcagcatca:7903-g:3132-c:26635-g:333442-a:1002-g:193-gc:60-ag:12-tg:55-g:6-g:41-ct:34-g:104-tc:1588-t:175-c:16-ca:8-a:4-ga:142-g:2-at:16-t:164-g:208-g:2-c:179-g:103-c:560-ag:38-t:709-ac:99222-g:72538-ag:1538-t:432-c:388-c:215-ga:51065-cact:80253-ta:460960-ta:530-g:72-c:85-g:329-t:401-t:29-a:349-t:26-ga:51-a:419-c:42-a:151-c:559-a:671-tc:317-tc:56-g:83-at:6027-tc:235095-g:8361-g:127685-cg:5-c:153-tc:252-ca:422-t:73-a:269-g:195-a:91-g:841-t:23-g:15-a:142-ta:57-g:323-ac:68552-ct:117-c:90-at:140-g:327-ga:70-t:181-tc:378-t:487-ga:432-ct:16-g:123848-c:157-g:85-at:43-g:48-t:49-t:15-ga:113-ag:140-ga:60-g:152-t:7-ga:394-c:21-c:160-ac:137-c:321-tc:290-a:23-a:92-gc:140-a:196-a:102-gt:633-g:5-a:38-ga:376-ga:94-g:61552*tc:1-cgcatcgacatcacgctgatgcgacgctacgcgtctatcagctacgcagacagcgcatagctgatagcgtgatgtagtcgatagcgta:169212-ac:85645
+ctg1	3423273	0	35825	-	NC_000913.3	3421989	0	35833	35825	35833	60	NM:i:8	ms:i:35610	AS:i:35606	nn:i:0	tp:A:P	cm:i:3614	s1:i:35746	s2:i:982	de:f:0.0001	rl:i:0	cg:Z:35109M1D85M2D211M2D77M1D139M2D204M	cs:Z::35109-g:85-ta:211-ta:77-c:139-cg:204\n";
+
+    let parsed_lines = parse_input_str(input).unwrap();
+    let parsed_lines_from_bytes = parse_input_read(&mut input.as_bytes()).unwrap();
+    assert!(parsed_lines.eq(&parsed_lines_from_bytes));
+
+    let mut output = String::new();
+    for line in &parsed_lines {
+        write!(output, "{line}\n").unwrap();
+    }
+
+    assert_eq!(input, output);
+}

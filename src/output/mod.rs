@@ -5,11 +5,12 @@ use std::fmt::{Display, Formatter};
 
 impl Display for PAFLine {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // required fields
         write!(f, "{}", self.query_sequence_name)?;
         write!(f, "\t{}", self.query_sequence_length)?;
         write!(f, "\t{}", self.query_start_coordinate)?;
         write!(f, "\t{}", self.query_end_coordinate)?;
-        write!(f, "\t{}", self.strand)?;
+        write!(f, "\t{}", if self.strand { '+' } else { '-' })?;
         write!(f, "\t{}", self.target_sequence_name)?;
         write!(f, "\t{}", self.target_sequence_length)?;
         write!(f, "\t{}", self.target_start_coordinate_on_original_strand)?;
@@ -18,6 +19,19 @@ impl Display for PAFLine {
         write!(f, "\t{}", self.number_of_bases_and_gaps)?;
         write!(f, "\t{}", self.mapping_quality)?;
 
+        // optional fields with known order
+        if let Some(x) = self.total_number_of_mismatches_and_gaps {
+            write!(f, "\tNM:i:{x}")?;
+        }
+        if let Some(x) = self.best_segment_dp_score {
+            write!(f, "\tms:i:{x}")?;
+        }
+        if let Some(x) = self.dp_alignment_score {
+            write!(f, "\tAS:i:{x}")?;
+        }
+        if let Some(x) = self.number_of_ambiguous_bases {
+            write!(f, "\tnn:i:{x}")?;
+        }
         if let Some(x) = &self.alignment_type {
             write!(f, "\ttp:A:{x}")?;
         }
@@ -30,23 +44,20 @@ impl Display for PAFLine {
         if let Some(x) = self.best_secondary_chaining_score {
             write!(f, "\ts2:i:{x}")?;
         }
-        if let Some(x) = self.total_number_of_mismatches_and_gaps {
-            write!(f, "\tNM:i:{x}")?;
+        if let Some(x) = self.gap_compressed_per_base_sequence_divergence {
+            write!(f, "\tde:f:{x}")?;
         }
+        if let Some(x) = self.length_of_query_regions_with_repetitive_seeds {
+            write!(f, "\trl:i:{x}")?;
+        }
+
+        // optional fields without known order, or that do not contradict the known order (cg and cs)
+        // the order is the same as in the man page at https://lh3.github.io/minimap2/minimap2.html#10
         if let Some(x) = &self.unknown_md {
             write!(f, "\tMD:Z:{x}")?;
         }
-        if let Some(x) = self.dp_alignment_score {
-            write!(f, "\tAS:i:{x}")?;
-        }
         if let Some(x) = &self.supplementary_alignments {
             write!(f, "\tSA:Z:{x}")?;
-        }
-        if let Some(x) = self.best_segment_dp_score {
-            write!(f, "\tms:i:{x}")?;
-        }
-        if let Some(x) = self.number_of_ambiguous_bases {
-            write!(f, "\tnn:i:{x}")?;
         }
         if let Some(x) = &self.transcript_strand {
             write!(f, "\tts:A:{x}")?;
@@ -59,12 +70,6 @@ impl Display for PAFLine {
         }
         if let Some(x) = self.approximate_per_base_sequence_divergence {
             write!(f, "\tdv:f:{x}")?;
-        }
-        if let Some(x) = self.gap_compressed_per_base_sequence_divergence {
-            write!(f, "\tde:f:{x}")?;
-        }
-        if let Some(x) = self.length_of_query_regions_with_repetitive_seeds {
-            write!(f, "\trl:i:{x}")?;
         }
 
         Ok(())

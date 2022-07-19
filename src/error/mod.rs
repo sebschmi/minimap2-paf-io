@@ -5,9 +5,13 @@ pub type Result<T> = std::result::Result<T, Error>;
 ///
 /// Printing is error-free, except for IO errors.
 /// Therefore when printing, Rust's [std::io::Error] is used.
+#[derive(Debug)]
 pub enum Error {
+    /// An I/O error.
+    IOError(std::io::Error),
+
     /// Parsing error when parsing the column into the expected type.
-    ColumnParseError(Box<dyn std::error::Error>),
+    ColumnParseError,
 
     /// The line was ended, but it was not expected (e.g. further columns are expected instead).
     UnexpectedEndOfLine,
@@ -19,7 +23,11 @@ pub enum Error {
     UnexpectedCharacter,
 
     /// An optional column with an unexpected name or type was found.
-    UnexpectedOptionalColumn,
+    UnexpectedOptionalColumn {
+        /// The header of the column, or a part of it.
+        /// The header is the name and type.
+        column_header: String,
+    },
 
     /// A cigar string could not be parsed.
     MalformedCigar,
@@ -28,8 +36,8 @@ pub enum Error {
     MalformedAlignmentDifference,
 }
 
-pub(crate) fn column_parse_error<SourceError: 'static + std::error::Error>(
-    source_error: SourceError,
-) -> Error {
-    Error::ColumnParseError(Box::new(source_error))
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Self::IOError(error)
+    }
 }

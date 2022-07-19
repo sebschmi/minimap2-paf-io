@@ -12,3 +12,5 @@ pub mod error;
 pub mod input;
 /// Output PAF lines.
 pub mod output;
+#[cfg(test)]
+mod tests;
