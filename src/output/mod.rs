@@ -72,6 +72,11 @@ impl Display for PAFLine {
             write!(f, "\tdv:f:{x}")?;
         }
 
+        // unknown fields
+        for unknown_field in &self.unknown_fields {
+            write!(f, "\t{unknown_field}")?;
+        }
+
         Ok(())
     }
 }

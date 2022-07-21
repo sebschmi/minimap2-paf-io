@@ -2,6 +2,7 @@ use crate::data::{
     AlignmentDifference, AlignmentType, Cigar, CigarColumn, DifferenceColumn, PAFLine,
 };
 use crate::error::{Error, Result};
+use log::warn;
 use std::io::{BufRead, BufReader, Read};
 use std::str::FromStr;
 
@@ -68,6 +69,7 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
     let mut approximate_per_base_sequence_divergence = None;
     let mut gap_compressed_per_base_sequence_divergence = None;
     let mut length_of_query_regions_with_repetitive_seeds = None;
+    let mut unknown_fields = Vec::new();
 
     loop {
         if string.starts_with('\n') {
@@ -189,9 +191,10 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
                 )
             }
             other => {
-                return Err(Error::UnexpectedOptionalColumn {
-                    column_header: other.to_string(),
-                })
+                warn!("Found unknown field: {other}");
+                let mut unknown_field = other.to_string();
+                unknown_field.push_str(extract_column_value(string)?);
+                unknown_fields.push(unknown_field);
             }
         }
     }
@@ -228,6 +231,8 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
         approximate_per_base_sequence_divergence,
         gap_compressed_per_base_sequence_divergence,
         length_of_query_regions_with_repetitive_seeds,
+
+        unknown_fields,
     })
 }
 

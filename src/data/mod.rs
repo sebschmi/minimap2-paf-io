@@ -37,6 +37,8 @@ pub struct PAFLine {
     pub approximate_per_base_sequence_divergence: Option<f64>,
     pub gap_compressed_per_base_sequence_divergence: Option<f64>,
     pub length_of_query_regions_with_repetitive_seeds: Option<usize>,
+
+    pub unknown_fields: Vec<String>,
 }
 
 /// The type of a minimap2 alignment. See the [minimap2 readme](https://github.com/lh3/minimap2#algorithm-overview) for more information.
