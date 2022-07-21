@@ -1,6 +1,6 @@
 [package]
 name = "minimap2-paf-io"
-version = "0.1.0"
+version = "1.0.0"
 description = "Read and write data in minimap2's PAF format."
 authors = ["Sebastian Schmidt <sebastian.schmidt@helsinki.fi>"]
 documentation = "https://docs.rs/minimap2-paf-io"
