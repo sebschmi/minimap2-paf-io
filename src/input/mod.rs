@@ -101,70 +101,70 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
                 number_of_minimisers = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed cm:i:".to_string()))?,
                 )
             }
             "s1:i:" => {
                 chaining_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed s1:i:".to_string()))?,
                 )
             }
             "s2:i:" => {
                 best_secondary_chaining_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed s2:i:".to_string()))?,
                 )
             }
             "NM:i:" => {
                 total_number_of_mismatches_and_gaps = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed NM:i:".to_string()))?,
                 )
             }
             "MD:Z:" => {
                 unknown_md = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed MD:Z:".to_string()))?,
                 )
             }
             "AS:i:" => {
                 dp_alignment_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed AS:i:".to_string()))?,
                 )
             }
             "SA:Z:" => {
                 supplementary_alignments = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed SA:Z:".to_string()))?,
                 )
             }
             "ms:i:" => {
                 best_segment_dp_score = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed ms:i:".to_string()))?,
                 )
             }
             "nn:i:" => {
                 number_of_ambiguous_bases = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed nn:i:".to_string()))?,
                 )
             }
             "ts:A:" => {
                 transcript_strand = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed ts:i:".to_string()))?,
                 )
             }
             "cg:Z:" => cigar_string = Some(parse_cigar(string)?),
@@ -173,21 +173,21 @@ pub fn parse_line(string: &mut &str) -> Result<PAFLine> {
                 approximate_per_base_sequence_divergence = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed dv:f:".to_string()))?,
                 )
             }
             "de:f:" => {
                 gap_compressed_per_base_sequence_divergence = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed de:f:".to_string()))?,
                 )
             }
             "rl:i:" => {
                 length_of_query_regions_with_repetitive_seeds = Some(
                     extract_column_value(string)?
                         .parse()
-                        .map_err(|_| Error::ColumnParseError)?,
+                        .map_err(|_| Error::Message("Malformed rl:i:".to_string()))?,
                 )
             }
             other => {
@@ -285,7 +285,7 @@ fn parse_cigar(string: &mut &str) -> Result<Cigar> {
 
         let count = string[..limit]
             .parse()
-            .map_err(|_| Error::ColumnParseError)?;
+            .map_err(|_| Error::Message(format!("Malformed cigar count: {}", &string[..limit])))?;
         result.push(match &string[limit..limit + 1] {
             "M" => CigarColumn::Match(count),
             "D" => CigarColumn::Deletion(count),
@@ -317,7 +317,12 @@ fn parse_alignment_difference(string: &mut &str) -> Result<AlignmentDifference> 
 
         result.push(match marker {
             ":" => DifferenceColumn::Match {
-                length: characters.parse().map_err(|_| Error::ColumnParseError)?,
+                length: characters.parse().map_err(|_| {
+                    Error::Message(format!(
+                        "Malformed alignment difference length: {}",
+                        characters
+                    ))
+                })?,
             },
             "-" => DifferenceColumn::Deletion {
                 missing_query_characters: characters.to_string(),

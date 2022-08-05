@@ -34,6 +34,9 @@ pub enum Error {
 
     /// An alignment difference string could not be parsed.
     MalformedAlignmentDifference,
+
+    /// Quick and dirty: simply use strings to report errors.
+    Message(String),
 }
 
 impl From<std::io::Error> for Error {
